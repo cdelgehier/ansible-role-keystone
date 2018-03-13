@@ -1,0 +1,32 @@
+---
+- name: Wait for services to be up
+  uri:
+    url: "{{ item }}"
+    method: "HEAD"
+    status_code: 300
+  with_items:
+    - "http://{{ openio_keystone_uwsgi_bind['keystone-wsgi-admin']['http-socket'] }}"
+    - "http://{{ openio_keystone_uwsgi_bind['keystone-wsgi-public']['http-socket'] }}"
+  register: _wait_check
+  until: _wait_check | success
+  retries: 12
+  delay: 5
+
+- name: Bootstrap keystone admin and endpoint
+  command: |
+     {{ openio_keystone_bindir }}/keystone-manage bootstrap \
+     --bootstrap-username {{ item.name }} \
+     --bootstrap-password {{ item.password }} \
+     --bootstrap-project-name {{ item.project }} \
+     --bootstrap-role-name {{ item.role }} \
+     --bootstrap-service-name {{ item.name }} \
+     --bootstrap-region-id {{ item.regionid }} \
+     --bootstrap-admin-url {{ item.adminurl }} \
+     --bootstrap-public-url {{ item.publicurl }} \
+     --bootstrap-internal-url {{ item.internalurl }}
+  with_items: "{{ openio_keystone_services_to_bootstrap }}"
+  register: add_service
+  until: add_service|success
+  retries: 5
+  delay: 10
+...

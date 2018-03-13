@@ -1,0 +1,41 @@
+---
+- name: Create SQLite directory
+  file:
+    path: "{{ openio_keystone_database_sqlite_directory }}"
+    owner: keystone
+    group: keystone
+    mode: 0755
+    state: directory
+  when: openio_keystone_database_engine == 'sqlite'
+
+- name: Create SQLite databases
+  file:
+    name: "{{ openio_keystone_database_sqlite_directory }}/{{ openio_keystone_database_sqlite_file }}"
+    owner: keystone
+    group: keystone
+    mode: 0644
+    state: touch
+  changed_when: false
+  when: openio_keystone_database_engine == 'sqlite'
+
+- name: Check current state of Keystone DB
+  shell: "{{ openio_keystone_bindir }}/keystone-manage db_sync --check"
+  register: _db_sync_check
+  failed_when: "_db_sync_check.rc == 1"
+  changed_when: false
+
+- name: "Perform a Keystone DB sync expand"
+  command: "{{ openio_keystone_bindir }}/keystone-manage db_sync --expand"
+  when:
+    - _db_sync_check.rc | int == 2
+
+- name: Perform a Keystone DB sync migrate
+  command: "{{ openio_keystone_bindir }}/keystone-manage db_sync --migrate"
+  when:
+    - _db_sync_check.rc | int in [2, 3]
+
+- name: Perform a Keystone DB sync contract
+  command: "{{ openio_keystone_bindir }}/keystone-manage db_sync --contract"
+  when:
+    - _db_sync_check.rc | int in [2, 3, 4]
+...

@@ -1,8 +1,11 @@
-# roles/ROLENAME/vars/RedHat.yml
+# roles/keystone/vars/RedHat.yml
 # Distribution-specific variables for RHEL, CentOS, ...
 ---
-ROLENAME_packages:
-  - ROLENAME
+keystone_packages:
+  - openstack-keystone
+  - uwsgi
+  - uwsgi-plugin-python
+  - python2-shade
 
-ROLENAME_service: ROLENAMEd
+openio_keystone_uwsgi_config_dir: /etc/uwsgi.d
 ...

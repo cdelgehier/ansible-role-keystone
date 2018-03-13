@@ -1,8 +1,15 @@
-# roles/ROLENAME/vars/Debian.yml
+# roles/keystone/vars/Debian.yml
 # Distribution-specific variables for Ubuntu, Debian, ...
 ---
-ROLENAME_packages:
-  - ROLENAME
+keystone_packages:
+  - keystone
+  - uwsgi-core
+  - uwsgi-plugin-python
+  - python-shade
 
-ROLENAME_service: ROLENAMEd
+openio_keystone_repo_apt_baseurl: http://ubuntu-cloud.archive.canonical.com/ubuntu
+openio_keystone_repo_apt_key_id: 5EDB1B62EC4926EA
+openio_keystone_repo_apt_key_keyserver: keyserver.ubuntu.com
+
+openio_keystone_uwsgi_config_dir: /etc/uwsgi
 ...

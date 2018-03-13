@@ -1,7 +1,25 @@
 ---
+- name: "Configure Openstack {{ openio_keystone_openstack_distribution }} release repository"
+  apt_repository:
+    repo: "deb {{ openio_keystone_repo_apt_baseurl }} {{ ansible_lsb.codename }}-updates/{{ openio_keystone_openstack_distribution }} main"
+    state: present
+    filename: "cloudarchive-{{ openio_keystone_openstack_distribution }}"
+  when: openio_keystone_repo_managed
+
+- name: "Setup repository key for Openstack repository"
+  apt_key:
+    id: "{{ openio_keystone_repo_apt_key_id }}"
+    keyserver: "{{ openio_keystone_repo_apt_key_keyserver }}"
+  when: openio_keystone_repo_managed
+
+- name: "Update APT cache"
+  apt:
+    update_cache: yes
+  changed_when: false
+
 - name: Install packages
   package:
     name: "{{ item }}"
     state: installed
-  with_items: "{{ ROLENAME_packages }}"
+  with_items: "{{ keystone_packages }}"
 ...

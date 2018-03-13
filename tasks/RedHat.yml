@@ -1,7 +1,14 @@
 ---
+
+- name: RedHat| Install repository
+  package:
+    name: "centos-release-openstack-{{ openio_keystone_openstack_distribution }}"
+    state: installed
+  when: openio_keystone_repo_managed
+
 - name: Install packages
   package:
     name: "{{ item }}"
     state: installed
-  with_items: "{{ ROLENAME_packages }}"
+  with_items: "{{ keystone_packages }}"
 ...

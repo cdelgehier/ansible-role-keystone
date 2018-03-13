@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Cedric DELGEHIER <cedric@openio.io>
-  description: PURPOSE
+  description: Install and configure a Keystone
   company: openio.io
   license: Apache
 
@@ -17,7 +17,10 @@ galaxy_info:
 
   galaxy_tags:
     - system
-    
+    - openstack
+    - keystone
+    - authentication
+
     # List tags for your role here, one per line. A tag is
     # a keyword that describes and categorizes the role.
     # Users find roles by searching for tags. Be sure to

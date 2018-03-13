@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+[uwsgi]
+uid = {{ openio_keystone_system_user_name }}
+gid = {{ openio_keystone_system_group_name }}
+
+wsgi-file = {{ openio_keystone_bindir }}/{{ item }}
+http-socket = {{ openio_keystone_uwsgi_bind[item]['http-socket']|default('') }}
+plugins = python
+
+master = true
+enable-threads = true
+processes = {{ openio_keystone_wsgi_processes }}
+threads = {{ openio_keystone_wsgi_threads }}
+exit-on-reload = true
+die-on-term = true
+lazy-apps = true
+add-header = Connection: close
+buffer-size = 65535
+thunder-lock = true

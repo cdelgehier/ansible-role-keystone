@@ -1,24 +1,10 @@
-# roles/ROLENAME/tasks/main.yml
+# roles/keystone/tasks/main.yml
 ---
 - name: "Include {{ ansible_distribution }} variables"
   include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_distribution }}.yml"
     - "{{ ansible_os_family }}.yml"
-  tags: install
-
-- name: Create the 'openio' group
-  group:
-    name: openio
-    gid: "{{ openio_group_openio_gid | default('220')}}"
-  tags: install
-
-- name: Create the 'openio' user
-  user:
-    name: openio
-    comment: "openio account"
-    uid: "{{ openio_user_openio_uid | default('120')}}"
-    group: openio
   tags: install
 
 - name: "Include {{ ansible_distribution }} tasks"
@@ -28,10 +14,40 @@
     - "{{ ansible_os_family }}.yml"
   tags: install
 
-- name: Ensure service is started
-  service:
-    name: "{{ ROLENAME_service }}"
-    state: started
-    enabled: true
+- name: 'Install configuration files 1/2'
+  copy:
+    src: keystone-paste.ini
+    dest: "{{ openio_keystone_config_dir }}/keystone-paste.ini"
+    owner: root
+    group: "{{ openio_keystone_system_group_name }}"
+    mode: '0640'
   tags: configure
+
+- name: 'Install configuration files 2/2'
+  template:
+    src: keystone.conf.j2
+    dest: "{{ openio_keystone_config_dir }}/keystone.conf"
+    owner: root
+    group: "{{ openio_keystone_system_group_name }}"
+    mode: '0640'
+  tags: configure
+
+- import_tasks: db_setup.yml
+  tags: configure
+
+- import_tasks: fernet.yml
+  when:
+    - "'fernet' in openio_keystone_token_provider"
+
+- import_tasks: credentials.yml
+
+- import_tasks: uwsgi.yml
+  tags: configure
+
+- import_tasks: bootstrap.yml
+  when: 
+    - _db_sync_check.rc | int == 2
+    - (not openio_keystone_bootstrap_all_nodes and inventory_hostname == groups[openio_keystone_nodes_group][0]) or openio_keystone_bootstrap_all_nodes
+  tags: configure
+
 ...

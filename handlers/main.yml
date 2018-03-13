@@ -1,8 +1,6 @@
-# roles/ROLENAME/handlers/main.yml
+# roles/keystone/handlers/main.yml
 ---
-- name: restart ROLENAME
-  service:
-    name: "{{ ROLENAME_service }}"
-    state: restarted
+#- name: restart gridinit 
+#  command: "gridinit_cmd restart @keytone"
 
 ...

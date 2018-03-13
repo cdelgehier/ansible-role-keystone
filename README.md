@@ -1,44 +1,11 @@
+[![Build Status](https://travis-ci.org/open-io/ansible-role-openio-keystone.svg?branch=master)](https://travis-ci.org/open-io/ansible-role-openio-keystone)
+# Ansible role `keystone`
 
-> **Remove this part after a clone**
+An Ansible role for keystone. Specifically, the responsibilities of this role are to:
 
-```sh
-git clone git@github.com:open-io/ansible-role-openio-skeleton.git ROLENAME
-cd ROLENAME
-grep -r -E '\b[A-Z]+\b' --exclude=LICENSE *
-git remote -v
-git remote set-url origin git@github.com:open-io/ansible-role-openio-ROLENAME.git
-find $PWD -type f -print0 | xargs -0 sed -i -e 's@ROLENAME@trueName@g'
-vi meta/main.yml # change purpose and tags
-vi README.md 
-git worktree add docker-tests origin/docker-tests
-```
-
-You have to :
-  - Change the author
-  - Choose one or many maintainers
-  - Change the purpose
-  - Change the rolename
-  - Inform the responsibilities of this role (README)
-  - Feed the `Role Variables` table (README)
-  - Add one or more examples of playbook (README)
-  - Schedule tests with in Travis CI
-  - Write functional tests in the branch `docker-tests`
-
-
-#### `Role Variables` table
-```sh
-for i in $(grep -E "^openio_" defaults/main.yml |cut -d':' -f1| sort); do echo '|' '`'$i'`'' | `'$(grep $i defaults/main.yml|cut -d: -f2|sed -e "s/^ //")'` | ... |'; done
-```
-
------REMOVE--THE---8<-----PREVIOUS---PART------
-
-__
-[![Build Status](https://travis-ci.org/open-io/ansible-role-openio-ROLENAME.svg?branch=master)](https://travis-ci.org/open-io/ansible-role-openio-ROLENAME)
-# Ansible role `ROLENAME`
-
-An Ansible role for PURPOSE. Specifically, the responsibilities of this role are to:
-
--
+- Install a keystone
+- Configure a keystone
+- Support SQLite or MySQL engine
 
 ## Requirements
 
@@ -49,26 +16,90 @@ An Ansible role for PURPOSE. Specifically, the responsibilities of this role are
 
 | Variable   | Default | Comments (type)  |
 | :---       | :---    | :---             |
-| `openio_ROLENAME_...` | `...`   | ...              |
-
+| `openio_keystone_bindir` | `/usr/bin` | OpenStack's bin folder |
+| `openio_keystone_bootstrap_all_nodes` | `true` | Bootstrap the first endpoint on all nodes |
+| `openio_keystone_config_cache_backend` | `""` |  |
+| `openio_keystone_config_cache_debug_cache_backend` | `""` |  |
+| `openio_keystone_config_cache_enabled` | `true` |  |
+| `openio_keystone_config_cache_memcache_dead_retry` | `""` |  |
+| `openio_keystone_config_cache_memcache_servers` | `"{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}` | Local memcached address |
+| `openio_keystone_config_default_admin_token` | `""` |  |
+| `openio_keystone_config_default_debug` | `false` |  |
+| `openio_keystone_config_default_log_dir` | `/var/log/keystone` | Log file |
+| `openio_keystone_config_dir` | `/etc/keystone` |  |
+| `openio_keystone_credentials_tokens_key_repository` | `/etc/keystone/credential-keys/` |  |
+| `openio_keystone_database_connection` | `` |  |
+| `openio_keystone_database_engine` | `sqlite` | SQL engine used to store data (sqlite or mysql is possible) |
+| `openio_keystone_database_mysql_connection_address` | `127.0.0.1` | MySQL's address (in case of mysql engine) |
+| `openio_keystone_database_mysql_connection_database` | `keystone` | MySQL's database for keystone (in case of mysql engine) |
+| `openio_keystone_database_mysql_connection_password` | `KEYSTONE_PASS` | MySQL's password for previous user (in case of mysql engine) |
+| `openio_keystone_database_mysql_connection_user` | `keystone` | MySQL's user for keystone (in case of mysql engine) |
+| `openio_keystone_database_sqlite_directory` | `/var/lib/keystone` | Database's folder (in case of sqlite engine) |
+| `openio_keystone_database_sqlite_file` | `keystone.db` | Database's file (in case of sqlite engine) |
+| `openio_keystone_fernet_tokens_key_repository` | `/etc/keystone/fernet-keys/` | Folder for fernet keys |
+| `openio_keystone_nodes_group` | `openio_keystone` | Group of inventory |
+| `openio_keystone_openstack_distribution` | `pike` | Distribution of OpenStack |
+| `openio_keystone_repo_managed` | `false` | Install repository OpenStack |
+| `openio_keystone_services_to_bootstrap` | `` | List of service to declare |
+| `openio_keystone_system_group_name` | `keystone` |  |
+| `openio_keystone_system_user_name` | `keystone` |  |
+| `openio_keystone_tmp_keys_dir` | `/tmp` | Local folder used to share keys and credentials |
+| `openio_keystone_token_provider` | `fernet` |  |
+| `openio_keystone_uwsgi_bind` | `` | Dict of service to serve via uwsgi |
+| `openio_keystone_wsgi_admin_program_name` | `keystone-wsgi-admin` | WSGI Script Admin |
+| `openio_keystone_wsgi_managed_by` | `gridinit` | The uwsgi are managed by the gridinit |
+| `openio_keystone_wsgi_processes` | `{{ [[ansible_processor_vcpus|default(1), 1] | max * 2, openio_keystone_wsgi_processes_max] | min }}` |  |
+| `openio_keystone_wsgi_program_names` | `` | Dict of WSGI Script to serve |
+| `openio_keystone_wsgi_public_program_name` | `keystone-wsgi-public` | WSGI Script public |
+| `openio_keystone_wsgi_threads` | `1` |  |
 ## Dependencies
 
-No dependencies.
+- Epel for RedHat familly
+- This role don't install a MariaDB server (in case of mysql engine). You have to install it
+- This role don't manage the gridinit ressources. You have to configure them before.
 
 ## Example Playbook
 
 ```yaml
-- hosts: all
+- hosts: keystones
   gather_facts: true
   become: true
   roles:
-    - role: ROLENAME
+    - role: keystone
+      openio_keystone_config_cache_memcache_servers: 127.0.0.1
+      openio_keystone_nodes_group: keystones
+
+    - role: keystone
+      openio_keystone_config_cache_memcache_servers: 127.0.0.1
+      openio_keystone_database_engine: mysql
+      openio_keystone_database_mysql_connection_user: keystone
+      openio_keystone_database_mysql_connection_password: keystonepass
+      openio_keystone_database_mysql_connection_address: 127.0.0.1
+      openio_keystone_database_mysql_connection_database: keystone
+      openio_keystone_nodes_group: keystones
 ```
 
 
 ```ini
-[all]
+[keystones]
 node1 ansible_host=192.168.1.173
+```
+
+### Rights for keystone user (mysql)
+```
+mariadb_databases:
+  - name: keystone
+mariadb_users:
+  - name: keystone
+    password: "{{ keystone_mysql_keystoneuser_password }}"
+    priv: 'keystone.*:ALL'
+    host: '%'
+
+  - name: keystone
+    password: "{{ keystone_mysql_keystoneuser_password }}"
+    priv: '*.*:SUPER'
+    append_privs: yes
+    host: '%'
 ```
 
 ## Contributing
@@ -87,6 +118,4 @@ Apache License, Version 2.0
 
 - [Cedric DELGEHIER](https://github.com/cdelgehier) (maintainer)
 - [Romain ACCIARI](https://github.com/racciari) (maintainer)
-- [Vincent LEGOLL](https://github.com/vincent-legoll) (maintainer)
-- [Sebastien LAPIERRE](https://github.com/sebastienlapierre) (maintainer)
-- [Geoffrey TIEN](https://github.com/GeoffreyTien) (maintainer)
+- [Pierre Mavro](https://github.com/deimosfr)
