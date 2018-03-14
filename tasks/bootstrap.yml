@@ -15,7 +15,7 @@
 - name: Bootstrap keystone admin and endpoint
   command: |
      {{ openio_keystone_bindir }}/keystone-manage bootstrap \
-     --bootstrap-username {{ item.name }} \
+     --bootstrap-username {{ item.user }} \
      --bootstrap-password {{ item.password }} \
      --bootstrap-project-name {{ item.project }} \
      --bootstrap-role-name {{ item.role }} \
