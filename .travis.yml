@@ -25,6 +25,8 @@ before_install:
 script:
   # Create container and apply test playbook
   - ./docker-tests/docker-tests.sh
+  - ./docker-tests/docker-tests.sh test_mysql
 
   # Run functional tests on the container
-  - SUT_ID=$(docker ps -qa) ./docker-tests/functional-tests.sh
+  - SUT_IP=172.17.0.2 ./docker-tests/functional-tests.sh
+  - SUT_IP=172.17.0.3 ./docker-tests/functional-tests.sh
