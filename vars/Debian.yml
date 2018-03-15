@@ -6,6 +6,7 @@ keystone_packages:
   - uwsgi-core
   - uwsgi-plugin-python
   - python-shade
+  - python-cffi
 
 openio_keystone_repo_apt_baseurl: http://ubuntu-cloud.archive.canonical.com/ubuntu
 openio_keystone_repo_apt_key_id: 5EDB1B62EC4926EA
