@@ -1,5 +1,8 @@
 # roles/keystone/defaults/main.yml
 ---
+openio_keystone_namespace: "OPENIO"
+openio_keystone_serviceid: "0"
+
 openio_keystone_repo_managed: false
 openio_keystone_openstack_distribution: pike
 openio_keystone_nodes_group: openio_keystone
@@ -38,7 +41,7 @@ openio_keystone_fernet_tokens_key_repository: /etc/keystone/fernet-keys/
 # Credentials
 openio_keystone_credentials_tokens_key_repository: /etc/keystone/credential-keys/
 
-openio_keystone_wsgi_managed_by: gridinit
+#openio_keystone_wsgi_managed_by: gridinit
 openio_keystone_wsgi_program_names:
   - "{{ openio_keystone_wsgi_public_program_name }}"
   - "{{ openio_keystone_wsgi_admin_program_name }}"

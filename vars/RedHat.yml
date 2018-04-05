@@ -7,5 +7,6 @@ keystone_packages:
   - uwsgi-plugin-python
   - python2-shade
 
-openio_keystone_uwsgi_config_dir: /etc/uwsgi.d
+#openio_keystone_uwsgi_config_dir: /etc/uwsgi.d
+openio_keystone_uwsgi_bin: /sbin/uwsgi
 ...

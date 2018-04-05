@@ -23,19 +23,23 @@
   register: _db_sync_check
   failed_when: "_db_sync_check.rc == 1"
   changed_when: false
+  run_once: yes
 
 - name: "Perform a Keystone DB sync expand"
   command: "{{ openio_keystone_bindir }}/keystone-manage db_sync --expand"
+  run_once: yes
   when:
     - _db_sync_check.rc | int == 2
 
 - name: Perform a Keystone DB sync migrate
   command: "{{ openio_keystone_bindir }}/keystone-manage db_sync --migrate"
+  run_once: yes
   when:
     - _db_sync_check.rc | int in [2, 3]
 
 - name: Perform a Keystone DB sync contract
   command: "{{ openio_keystone_bindir }}/keystone-manage db_sync --contract"
+  run_once: yes
   when:
     - _db_sync_check.rc | int in [2, 3, 4]
 ...

@@ -12,5 +12,6 @@ openio_keystone_repo_apt_baseurl: http://ubuntu-cloud.archive.canonical.com/ubun
 openio_keystone_repo_apt_key_id: 5EDB1B62EC4926EA
 openio_keystone_repo_apt_key_keyserver: keyserver.ubuntu.com
 
-openio_keystone_uwsgi_config_dir: /etc/uwsgi
+#openio_keystone_uwsgi_config_dir: /etc/uwsgi
+openio_keystone_uwsgi_bin: /usr/bin/uwsgi
 ...

@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+[Service.{{ openio_keystone_namespace }}-keystone-{{ openio_keystone_serviceid }}.{{item.0}}]
+command={{ openio_keystone_uwsgi_bin }} --ini {{ openio_keystone_sysconfig_dir }}/{{ openio_keystone_servicename }}/{{item.1}}.ini
+enabled=true
+start_at_boot=true
+on_die=respawn
+group={{ openio_keystone_namespace }},keystone,{{ openio_keystone_serviceid }},{{item.1}}
+uid=root
+gid=root
+env.PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+

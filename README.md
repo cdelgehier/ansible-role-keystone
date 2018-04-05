@@ -47,7 +47,6 @@ An Ansible role for keystone. Specifically, the responsibilities of this role ar
 | `openio_keystone_token_provider` | `fernet` |  |
 | `openio_keystone_uwsgi_bind` | `` | Dict of service to serve via uwsgi |
 | `openio_keystone_wsgi_admin_program_name` | `keystone-wsgi-admin` | WSGI Script Admin |
-| `openio_keystone_wsgi_managed_by` | `gridinit` | The uwsgi are managed by the gridinit |
 | `openio_keystone_wsgi_processes` | `{{ [[ansible_processor_vcpus|default(1), 1] | max * 2, openio_keystone_wsgi_processes_max] | min }}` |  |
 | `openio_keystone_wsgi_program_names` | `` | Dict of WSGI Script to serve |
 | `openio_keystone_wsgi_public_program_name` | `keystone-wsgi-public` | WSGI Script public |
