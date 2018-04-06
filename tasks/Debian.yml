@@ -1,7 +1,8 @@
 ---
 - name: "Configure Openstack {{ openio_keystone_openstack_distribution }} release repository"
   apt_repository:
-    repo: "deb {{ openio_keystone_repo_apt_baseurl }} {{ ansible_lsb.codename }}-updates/{{ openio_keystone_openstack_distribution }} main"
+    repo: "deb {{ openio_keystone_repo_apt_baseurl }} \
+      {{ ansible_lsb.codename }}-updates/{{ openio_keystone_openstack_distribution }} main"
     state: present
     filename: "cloudarchive-{{ openio_keystone_openstack_distribution }}"
   when: openio_keystone_repo_managed
@@ -14,12 +15,14 @@
 
 - name: "Update APT cache"
   apt:
-    update_cache: yes
+    update_cache: true
   changed_when: false
 
 - name: Install packages
   package:
-    name: "{{ item }}"
+    name: "{{ pkg }}"
     state: installed
   with_items: "{{ keystone_packages }}"
+  loop_control:
+    loop_var: pkg
 ...
