@@ -25,14 +25,19 @@ openio_keystone_config_default_log_dir: /var/log/keystone
 
 openio_keystone_config_default_admin_token: ""
 openio_keystone_config_default_debug: false
-openio_keystone_config_cache_backend: ""
+openio_keystone_config_cache_backend: dogpile.cache.memcached
 openio_keystone_config_cache_enabled: true
 openio_keystone_config_cache_debug_cache_backend: ""
-openio_keystone_config_cache_memcache_servers: "{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:6019"
+openio_keystone_config_cache_memcache_servers:
+  "{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:6019"
 openio_keystone_config_cache_memcache_dead_retry: ""
 
-openio_keystone_database_connection: >-
-  "{% if openio_keystone_database_engine == 'sqlite'%}sqlite:///{{ openio_keystone_database_sqlite_directory }}/{{ openio_keystone_database_sqlite_file }}{% elif openio_keystone_database_engine == 'mysql' %}mysql+pymysql://{{ openio_keystone_database_mysql_connection_user }}:{{ openio_keystone_database_mysql_connection_password }}@{{ openio_keystone_database_mysql_connection_address }}/{{ openio_keystone_database_mysql_connection_database }}?charset=utf8{% endif %}"
+openio_keystone_database_connection: "{% if openio_keystone_database_engine == 'sqlite'%}\
+  sqlite:///{{ openio_keystone_database_sqlite_directory }}/{{ openio_keystone_database_sqlite_file }}\
+  {% elif openio_keystone_database_engine == 'mysql' %}\
+  mysql+pymysql://{{ openio_keystone_database_mysql_connection_user }}:\
+  {{ openio_keystone_database_mysql_connection_password }}@{{ openio_keystone_database_mysql_connection_address }}/\
+  {{ openio_keystone_database_mysql_connection_database }}?charset=utf8{% endif %}"
 
 openio_keystone_token_provider: fernet
 openio_keystone_tmp_keys_dir: /tmp
@@ -53,10 +58,12 @@ openio_keystone_uwsgi_bind:
   keystone-wsgi-admin:
     http-socket: 0.0.0.0:35357
 openio_keystone_wsgi_threads: 1
-openio_keystone_wsgi_processes: "{{ [[ansible_processor_vcpus|default(1), 1] | max * 2, openio_keystone_wsgi_processes_max] | min }}"
+openio_keystone_wsgi_processes_max: 16
+openio_keystone_wsgi_processes: "{{ [[ansible_processor_vcpus|default(1), 1] | \
+  max * 2, openio_keystone_wsgi_processes_max] | min }}"
 
 # Bootstrap
-openio_keystone_bootstrap_all_nodes: true
+openio_keystone_bootstrap_all_nodes: false
 openio_keystone_services_to_bootstrap:
   - name: keystone
     user: admin
