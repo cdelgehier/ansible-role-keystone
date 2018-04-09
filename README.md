@@ -99,6 +99,7 @@ An Ansible role for keystone. Specifically, the responsibilities of this role ar
 
     - role: keystone
       openio_keystone_nodes_group: keystones
+      openio_keystone_namespace: "{{ namespace }}"
       openio_keystone_config_cache_memcache_servers: "{{ ansible_default_ipv4.address }}:6019"
       openio_keystone_database_engine: mysql
       openio_keystone_database_mysql_connection_user: keystone
@@ -119,6 +120,7 @@ An Ansible role for keystone. Specifically, the responsibilities of this role ar
 
     #shorter way with defaults and a local database
     #- role: keystone
+    #  openio_keystone_namespace: "{{ namespace }}"
     #  openio_keystone_bind_interface: eth0
     #  openio_keystone_database_engine: mysql
     #  openio_keystone_database_mysql_connection_user: keystone
