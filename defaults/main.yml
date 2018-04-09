@@ -24,7 +24,7 @@ openio_keystone_system_user_name: keystone
 openio_keystone_system_group_name: keystone
 openio_keystone_config_dir: /etc/keystone
 
-openio_keystone_config_default_log_dir: /var/log/keystone
+openio_keystone_config_default_log_dir: "/var/log/keystone"
 
 openio_keystone_config_default_admin_token: ""
 openio_keystone_config_default_debug: false
