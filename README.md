@@ -16,6 +16,7 @@ An Ansible role for keystone. Specifically, the responsibilities of this role ar
 
 | Variable   | Default | Comments (type)  |
 | :---       | :---    | :---             |
+| `openio_keystone_bind_interface` | `ansible_default_ipv4.alias` | Network interface to use |
 | `openio_keystone_bindir` | `/usr/bin` | OpenStack's bin folder |
 | `openio_keystone_bootstrap_all_nodes` | `true` | Bootstrap the first endpoint on all nodes |
 | `openio_keystone_config_cache_backend` | `""` |  |
@@ -30,7 +31,7 @@ An Ansible role for keystone. Specifically, the responsibilities of this role ar
 | `openio_keystone_credentials_tokens_key_repository` | `/etc/keystone/credential-keys/` |  |
 | `openio_keystone_database_connection` | `` |  |
 | `openio_keystone_database_engine` | `sqlite` | SQL engine used to store data (sqlite or mysql is possible) |
-| `openio_keystone_database_mysql_connection_address` | `127.0.0.1` | MySQL's address (in case of mysql engine) |
+| `openio_keystone_database_mysql_connection_address` | `openio_keystone_bind_interface.ipv4.address` | MySQL's address (in case of mysql engine) |
 | `openio_keystone_database_mysql_connection_database` | `keystone` | MySQL's database for keystone (in case of mysql engine) |
 | `openio_keystone_database_mysql_connection_password` | `KEYSTONE_PASS` | MySQL's password for previous user (in case of mysql engine) |
 | `openio_keystone_database_mysql_connection_user` | `keystone` | MySQL's user for keystone (in case of mysql engine) |
@@ -64,18 +65,66 @@ An Ansible role for keystone. Specifically, the responsibilities of this role ar
   gather_facts: true
   become: true
   roles:
-    - role: keystone
-      openio_keystone_config_cache_memcache_servers: 127.0.0.1
-      openio_keystone_nodes_group: keystones
+    - role: repository
+    - role: gridinit
+    - role: memcached
+      openio_memcached_namespace: "{{ namespace }}"
+      openio_memcached_serviceid: "0"
+      openio_memcached_bind_address: "{{ ansible_default_ipv4.address }}"
+
+
+    #sqlite
+    #- role: keystone
+    #  openio_keystone_nodes_group: keystones
+    #  openio_keystone_config_cache_memcache_servers: "{{ ansible_default_ipv4.address }}:6019"
+  
+    #mysql
+    - role: mariadb
+      mariadb_bind_address: "{{ ansible_default_ipv4.address }}"
+      mariadb_root_password: "{{ keystone_mysql_rootuser_password }}"
+      mariadb_databases:
+        - name: keystone
+      mariadb_users:
+        - name: keystone
+          password: "{{ keystone_mysql_keystoneuser_password }}"
+          priv: 'keystone.*:ALL'
+          host: '%'
+
+        - name: keystone
+          password: "{{ keystone_mysql_keystoneuser_password }}"
+          priv: '*.*:SUPER'
+          append_privs: "yes"
+          host: '%'
+
 
     - role: keystone
-      openio_keystone_config_cache_memcache_servers: 127.0.0.1
+      openio_keystone_nodes_group: keystones
+      openio_keystone_config_cache_memcache_servers: "{{ ansible_default_ipv4.address }}:6019"
       openio_keystone_database_engine: mysql
       openio_keystone_database_mysql_connection_user: keystone
       openio_keystone_database_mysql_connection_password: keystonepass
-      openio_keystone_database_mysql_connection_address: 127.0.0.1
+      openio_keystone_database_mysql_connection_address: "{{ ansible_default_ipv4.address }}"
       openio_keystone_database_mysql_connection_database: keystone
-      openio_keystone_nodes_group: keystones
+      openio_keystone_services_to_bootstrap:
+        - name: keystone
+          user: admin
+          password: ADMIN_PASS
+          project: admin
+          role: admin
+          regionid: RegionOne
+          adminurl: "http://{{ ansible_default_ipv4.address }}:35357"
+          publicurl: "http://{{ ansible_default_ipv4.address }}:5000"
+          internalurl: "http://{{ ansible_default_ipv4.address }}:5000"
+
+
+    #shorter way with defaults and a local database
+    #- role: keystone
+    #  openio_keystone_bind_interface: eth0
+    #  openio_keystone_database_engine: mysql
+    #  openio_keystone_database_mysql_connection_user: keystone
+    #  openio_keystone_database_mysql_connection_password: keystonepass
+
+      
 ```
 
 

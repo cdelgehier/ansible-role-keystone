@@ -3,6 +3,8 @@
 openio_keystone_namespace: "OPENIO"
 openio_keystone_serviceid: "0"
 
+openio_keystone_bind_interface: "{{ ansible_default_ipv4.alias }}"
+
 openio_keystone_repo_managed: false
 openio_keystone_openstack_distribution: pike
 openio_keystone_nodes_group: openio_keystone
@@ -12,7 +14,8 @@ openio_keystone_database_sqlite_directory: /var/lib/keystone
 openio_keystone_database_sqlite_file: keystone.db
 openio_keystone_database_mysql_connection_user: keystone
 openio_keystone_database_mysql_connection_password: KEYSTONE_PASS
-openio_keystone_database_mysql_connection_address: 127.0.0.1
+openio_keystone_database_mysql_connection_address:
+  "{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}"
 openio_keystone_database_mysql_connection_database: keystone
 
 
@@ -54,9 +57,11 @@ openio_keystone_wsgi_public_program_name: keystone-wsgi-public
 openio_keystone_wsgi_admin_program_name: keystone-wsgi-admin
 openio_keystone_uwsgi_bind:
   keystone-wsgi-public:
-    http-socket: 0.0.0.0:5000
+    http-socket:
+      "{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:5000"
   keystone-wsgi-admin:
-    http-socket: 0.0.0.0:35357
+    http-socket:
+      "{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:35357"
 openio_keystone_wsgi_threads: 1
 openio_keystone_wsgi_processes_max: 16
 openio_keystone_wsgi_processes: "{{ [[ansible_processor_vcpus|default(1), 1] | \
@@ -71,7 +76,10 @@ openio_keystone_services_to_bootstrap:
     project: admin
     role: admin
     regionid: RegionOne
-    adminurl: "http://{{ ansible_default_ipv4.address }}:35357"
-    publicurl: "http://{{ ansible_default_ipv4.address }}:5000"
-    internalurl: "http://{{ ansible_default_ipv4.address }}:5000"
+    adminurl:
+      "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:35357"
+    publicurl:
+      "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:5000"
+    internalurl:
+      "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:5000"
 ...
