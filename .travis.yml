@@ -25,6 +25,7 @@ before_install:
   - git fetch origin docker-tests
   - git worktree add docker-tests origin/docker-tests
   # Lint
+  - sudo pip install PyYAML>=3.12
   - sudo pip install --upgrade pip
   - sudo pip install ansible-lint yamllint
   # CI
