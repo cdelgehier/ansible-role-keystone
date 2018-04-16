@@ -1,5 +1,6 @@
 # .travis.yml Execution script for role tests on Travis-CI
 ---
+dist: trusty
 sudo: required
 
 env:
@@ -26,11 +27,9 @@ before_install:
   - git worktree add docker-tests origin/docker-tests
   # Lint
   - sudo pip install --upgrade "urllib3[secure]"
-  - sudo pip install PyYAML>=3.12
-  - sudo pip install --upgrade pip
-  - sudo pip install ansible-lint yamllint
-  # CI
+  - sudo pip install PyYAML>=3.12 Markdown>=2.0.1 
   - sudo pip install python-openstackclient
+  - sudo pip install ansible-lint yamllint
 
 script:
   # Lint
