@@ -1,6 +1,6 @@
 # roles/keystone/handlers/main.yml
 ---
-#- name: restart gridinit 
+#- name: restart gridinit
 #  command: "gridinit_cmd restart @keytone"
 
 ...

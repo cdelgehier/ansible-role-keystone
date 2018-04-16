@@ -1,0 +1,101 @@
+---
+- name: Ensuring local directory to hold the os-client-config file
+  file:
+    path: /etc/openstack
+    state: directory
+    owner: root
+    group: root
+
+- name: Adding clouds.yaml for os-client-config for further actions
+  template:
+    src: clouds.yaml.j2
+    dest: /etc/openstack/clouds.yaml
+    owner: root
+    group: root
+    mode: 0400
+
+- name: Users creation
+  os_user:
+    cloud: "{{ openio_keystone_cloudname }}"
+    state: present
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    email: "{{ item.email | default(omit) }}"
+    domain: "{{ item.domain | default('default') }}"
+    update_password: on_create
+  with_items: "{{ openio_keystone_users }}"
+  run_once: true
+  register: add_user
+  until: add_user is success
+  retries: 5
+  delay: 10
+
+
+- name: Projects creation
+  os_project:
+    cloud: "{{ openio_keystone_cloudname }}"
+    state: present
+    name: "{{ item.name }}"
+    description: "{{ item.description | default(omit) }}"
+    domain_id: default
+  with_items: "{{ openio_keystone_projects }}"
+  run_once: true
+  register: add_proj
+  until: add_proj is success
+  retries: 5
+  delay: 10
+
+
+- name: Add roles to projects
+  os_user_role:
+    cloud: "{{ openio_keystone_cloudname }}"
+    project: "{{ item.0.name }}"
+    user: "{{ item.1.user }}"
+    role: "{{ item.1.role }}"
+  with_subelements:
+    - "{{ openio_keystone_projects }}"
+    - roles
+  run_once: true
+  register: add_role
+  until: add_role is success
+  retries: 5
+  delay: 10
+
+
+- name: Declare a service
+  os_keystone_service:
+    cloud: "{{ openio_keystone_cloudname }}"
+    state: present
+    name: "{{ item.name }}"
+    service_type: "{{ item.type }}"
+    description: "{{ item.description | default(omit) }}"
+  with_items: "{{ openio_keystone_services }}"
+  run_once: true
+  register: add_service
+  until: add_service is success
+  retries: 5
+  delay: 10
+
+
+#- name: Add endpoint to service
+#  os_keystone_endpoint:
+#    cloud: "{{ openio_keystone_cloudname }}"
+#    service: "{{ item.0.name }}"
+#    endpoint_interface: "{{ item.1.interface }}"
+#    url: "{{ item.1.url }}"
+#    region: "{{ item.0.region_name | default('RegionOne') }}"
+#  with_subelements:
+#    - "{{ openio_keystone_services }}"
+#    - endpoint
+#  run_once: true
+
+- name: Add endpoint to service
+  command: "openstack --os-cloud {{ openio_keystone_cloudname }} endpoint create \
+              --region {{ item.0.region | default('RegionOne') }} \
+              {{ item.0.name }} {{ item.1.interface }} '{{ item.1.url }}'"
+  with_subelements:
+    - "{{ openio_keystone_services }}"
+    - endpoint
+  run_once: true
+  when: add_service is changed
+...

@@ -49,7 +49,9 @@ openio_keystone_fernet_tokens_key_repository: /etc/keystone/fernet-keys/
 # Credentials
 openio_keystone_credentials_tokens_key_repository: /etc/keystone/credential-keys/
 
-#openio_keystone_wsgi_managed_by: gridinit
+openio_keystone_gridinit_dir: "/etc/gridinit.d/{{ openio_keystone_namespace }}"
+openio_keystone_gridinit_file_prefix: ""
+
 openio_keystone_wsgi_program_names:
   - "{{ openio_keystone_wsgi_public_program_name }}"
   - "{{ openio_keystone_wsgi_admin_program_name }}"
@@ -82,4 +84,39 @@ openio_keystone_services_to_bootstrap:
       "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:5000"
     internalurl:
       "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:5000"
+
+openio_keystone_cloudname: openio
+openio_keystone_users:
+  - name: demo
+    password: DEMO_PASS
+  - name: swift
+    password: SWIFT_PASS
+
+openio_keystone_services:
+  - name: openio-swift
+    type: object-store
+    description: OpenIO SDS swift proxy
+    endpoint:
+      - interface: admin
+        url: "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:6007/v1/AUTH_%(tenant_id)s"
+      - interface: internal
+        url: "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:6007/v1/AUTH_%(tenant_id)s"
+      - interface: public
+        url: "http://{{ hostvars[inventory_hostname]['ansible_' + openio_keystone_bind_interface]['ipv4']['address'] }}:6007/v1/AUTH_%(tenant_id)s"
+
+
+openio_keystone_projects:
+  - name: service
+    domain_id: default
+    roles:
+      - user: swift
+        role: admin
+  - name: demo
+    description: OpenIO demo project
+    domain_id: default
+    roles:
+      - user: demo
+        role: _member_
+      - user: demo
+        role: admin
 ...

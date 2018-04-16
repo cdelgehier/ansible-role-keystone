@@ -8,25 +8,25 @@
     - "http://{{ openio_keystone_uwsgi_bind['keystone-wsgi-admin']['http-socket'] }}"
     - "http://{{ openio_keystone_uwsgi_bind['keystone-wsgi-public']['http-socket'] }}"
   register: _wait_check
-  until: _wait_check | success
+  until: _wait_check is success
   retries: 12
   delay: 5
 
 - name: Bootstrap keystone admin and endpoint
-  command: |
-     {{ openio_keystone_bindir }}/keystone-manage bootstrap \
-     --bootstrap-username {{ item.user }} \
-     --bootstrap-password {{ item.password }} \
-     --bootstrap-project-name {{ item.project }} \
-     --bootstrap-role-name {{ item.role }} \
-     --bootstrap-service-name {{ item.name }} \
-     --bootstrap-region-id {{ item.regionid }} \
-     --bootstrap-admin-url {{ item.adminurl }} \
-     --bootstrap-public-url {{ item.publicurl }} \
-     --bootstrap-internal-url {{ item.internalurl }}
+  command: "{{ openio_keystone_bindir }}/keystone-manage bootstrap \
+    --bootstrap-username {{ item.user }} \
+    --bootstrap-password {{ item.password }} \
+    --bootstrap-project-name {{ item.project }} \
+    --bootstrap-role-name {{ item.role }} \
+    --bootstrap-service-name {{ item.name }} \
+    --bootstrap-region-id {{ item.regionid }} \
+    --bootstrap-admin-url {{ item.adminurl }} \
+    --bootstrap-public-url {{ item.publicurl }} \
+    --bootstrap-internal-url {{ item.internalurl }}"
   with_items: "{{ openio_keystone_services_to_bootstrap }}"
   register: add_service
-  until: add_service|success
+  until: add_service is success
   retries: 5
   delay: 10
+  tags: skip_ansible_lint
 ...
