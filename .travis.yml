@@ -42,6 +42,8 @@ script:
   - ./docker-tests/docker-tests.sh test_mysql
 
   # Run functional tests on the container
-  - SUT_IP=172.17.0.2 ./docker-tests/functional-tests.sh
-  - SUT_IP=172.17.0.3 ./docker-tests/functional-tests.sh
+  # mysql
+  - SUT_ID=$(docker ps -aq |sed '1q;d') ./docker-tests/functional-tests.sh
+  # sqlite
+  - SUT_ID=$(docker ps -aq |sed '2q;d') ./docker-tests/functional-tests.sh
 ...
