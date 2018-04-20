@@ -25,4 +25,9 @@
   with_items: "{{ keystone_packages }}"
   loop_control:
     loop_var: pkg
+
+- name: Upgrade python-shade
+  pip:
+    name: shade
+    state: latest
 ...
